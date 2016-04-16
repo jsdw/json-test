@@ -1,0 +1,54 @@
+body {
+	margin: 15px;
+	padding: 0px;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	font-family: 'Source Sans Pro', sans-serif;
+}
+
+* {
+	box-sizing: border-box !important;
+}
+
+table, td, tr {
+	border-spacing: 0px;
+	border: 0px;
+}
+
+.row-name {
+	font-weight: 600;
+	vertical-align: top;
+	padding-right:20px;
+}
+
+.inputs {
+	.row-name {
+		vertical-align: middle;
+	}
+	.row-input {
+		select, input, textarea {
+			padding: 5px;
+			border-radius: 3px;
+			border: 1px solid rgb(206, 206, 206);
+			-webkit-appearance: none;
+			width: 400px;
+		}
+	}
+	.submit button {
+		margin: 0px;
+		padding: 6px 12px;
+		font-size: 90%;
+		border-radius: 3px;
+		border: 1px solid rgb(4, 200, 24);
+		background-color: rgb(72, 254, 129);
+	}
+}
+
+.response {
+	margin-top: 25px;
+}
+
+.container {
+	width: 80vw;
+}

@@ -84,7 +84,8 @@ makeRequestGiven model =
 view : Address Action -> Model -> Html
 view address model =
     div [ class "container" ]
-        [ table
+        [ h1 [] [ text "JSON Tester" ]
+        , table
             [ class "inputs" ]
             [ row "Path" "input-path" <|
                 input
@@ -98,19 +99,18 @@ view address model =
                     ]
             , row "JSON" "input-json" <|
                 textarea [ onInput address ReqBody, value model.req ] []
+            , tr [ class "submit" ]
+                [ td [] []
+                , td [] [ button [ onClick address Submit ] [ text "Submit" ] ]
+                ]
             ]
-        , div
-            [ class "submit" ]
-            [ button
-                [ onClick address Submit ]
-                [ text "Submit" ]
-            ]
-        , div
-            [ class "progress", hidden (not model.loading) ]
-            [ text "Fetching Response..." ]
         , div
             [ class "response", hidden (not <| isJust model.res) ]
-            [ viewResponse model.res ]
+            [ div
+                [ class "progress", hidden (not model.loading) ]
+                [ text "Fetching Response..." ]
+            , viewResponse model.res
+            ]
         ]
 
 isJust : Maybe a -> Bool
