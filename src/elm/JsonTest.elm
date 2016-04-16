@@ -105,11 +105,13 @@ view address model =
                 ]
             ]
         , div
-            [ class "response", hidden (not <| isJust model.res) ]
+            [ class "response" ]
             [ div
                 [ class "progress", hidden (not model.loading) ]
                 [ text "Fetching Response..." ]
-            , viewResponse model.res
+            , div
+                [ hidden (not <| isJust model.res) ]
+                [ viewResponse model.res ]
             ]
         ]
 

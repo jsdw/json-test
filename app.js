@@ -11097,11 +11097,11 @@ Elm.JsonTest.make = function (_elm) {
                               _U.list([]),
                               _U.list([A2($Html.button,_U.list([A2($Html$Events.onClick,address,Submit)]),_U.list([$Html.text("Submit")]))]))]))]))
               ,A2($Html.div,
-              _U.list([$Html$Attributes.$class("response"),$Html$Attributes.hidden($Basics.not(isJust(model.res)))]),
+              _U.list([$Html$Attributes.$class("response")]),
               _U.list([A2($Html.div,
                       _U.list([$Html$Attributes.$class("progress"),$Html$Attributes.hidden($Basics.not(model.loading))]),
                       _U.list([$Html.text("Fetching Response...")]))
-                      ,viewResponse(model.res)]))]));
+                      ,A2($Html.div,_U.list([$Html$Attributes.hidden($Basics.not(isJust(model.res)))]),_U.list([viewResponse(model.res)]))]))]));
    });
    var Model = F5(function (a,b,c,d,e) {    return {path: a,req: b,verb: c,res: d,loading: e};});
    var init = {ctor: "_Tuple2",_0: A5(Model,"","","GET",$Maybe.Nothing,false),_1: $Effects.none};
