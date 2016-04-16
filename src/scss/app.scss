@@ -27,6 +27,8 @@ table, td, tr {
 		vertical-align: middle;
 	}
 	.row-input {
+		white-space: pre-wrap;
+		word-break: break-all;
 		select, input, textarea {
 			padding: 5px;
 			border-radius: 3px;
