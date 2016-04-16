@@ -10960,12 +10960,12 @@ Elm.JsonTest.make = function (_elm) {
       return A3($Html$Events.on,"input",$Html$Events.targetValue,function (_p0) {    return A2($Signal.message,address,contentToValue(_p0));});
    });
    var row = F3(function (name,id,input) {
-      return A2($Html.div,
+      return A2($Html.tr,
       _U.list([$Html$Attributes.$class("row")]),
-      _U.list([A2($Html.div,
+      _U.list([A2($Html.td,
               _U.list([$Html$Attributes.$class("row-name")]),
               _U.list([A2($Html.label,_U.list([$Html$Attributes.$for(id)]),_U.list([$Html.text(name)]))]))
-              ,A2($Html.div,_U.list([$Html$Attributes.$class("row-input")]),_U.list([input]))]));
+              ,A2($Html.td,_U.list([$Html$Attributes.$class("row-input")]),_U.list([input]))]));
    });
    var viewResponse = function (res) {
       var viewBody = function (val) {
@@ -10978,10 +10978,10 @@ Elm.JsonTest.make = function (_elm) {
       };
       var viewHeader = function (_p2) {    var _p3 = _p2;return A3(row,_p3._0,"",$Html.text(_p3._1));};
       var response = function (details) {
-         return A2($Html.div,
+         return A2($Html.table,
          _U.list([]),
          _U.list([A3(row,"Status","",$Html.text(A2($Basics._op["++"],$Basics.toString(details.status),A2($Basics._op["++"],": ",details.statusText))))
-                 ,A3(row,"Headers","",A2($Html.div,_U.list([]),A2($List.map,viewHeader,$Dict.toList(details.headers))))
+                 ,A3(row,"Headers","",A2($Html.table,_U.list([]),A2($List.map,viewHeader,$Dict.toList(details.headers))))
                  ,A3(row,"Body","",viewBody(details.value))]));
       };
       var responseError = $Html.text("There was a low level error processing your request.");
@@ -10998,6 +10998,7 @@ Elm.JsonTest.make = function (_elm) {
                }
          }
    };
+   var isJust = function (m) {    var _p6 = m;if (_p6.ctor === "Nothing") {    return false;} else {    return true;}};
    var Submit = {ctor: "Submit"};
    var ResError = function (a) {    return {ctor: "ResError",_0: a};};
    var ResSuccess = function (a) {    return {ctor: "ResSuccess",_0: a};};
@@ -11005,22 +11006,22 @@ Elm.JsonTest.make = function (_elm) {
       var headers = _U.list([{ctor: "_Tuple2",_0: "Content-Type",_1: "application/json"}]);
       var request = {verb: model.verb,headers: headers,url: model.path,body: $Http.string(model.req)};
       var action = A2($Task.onError,
-      A2($Task.andThen,A2($Http.send,$Http.defaultSettings,request),function (_p6) {    return $Task.succeed(ResSuccess(_p6));}),
-      function (_p7) {
-         return $Task.succeed(ResError(_p7));
+      A2($Task.andThen,A2($Http.send,$Http.defaultSettings,request),function (_p7) {    return $Task.succeed(ResSuccess(_p7));}),
+      function (_p8) {
+         return $Task.succeed(ResError(_p8));
       });
       return $Effects.task(action);
    };
    var update = F2(function (action,model) {
       var noFx = function (m) {    return {ctor: "_Tuple2",_0: m,_1: $Effects.none};};
-      var _p8 = action;
-      switch (_p8.ctor)
-      {case "Path": return noFx(_U.update(model,{path: _p8._0}));
-         case "ReqVerb": return noFx(_U.update(model,{verb: _p8._0}));
-         case "ReqBody": return noFx(_U.update(model,{req: _p8._0}));
-         case "ResSuccess": return noFx(_U.update(model,{res: $Maybe.Just($Result.Ok(_p8._0))}));
-         case "ResError": return noFx(_U.update(model,{res: $Maybe.Just($Result.Err(_p8._0))}));
-         default: return {ctor: "_Tuple2",_0: model,_1: makeRequestGiven(model)};}
+      var _p9 = action;
+      switch (_p9.ctor)
+      {case "Path": return noFx(_U.update(model,{path: _p9._0}));
+         case "ReqVerb": return noFx(_U.update(model,{verb: _p9._0}));
+         case "ReqBody": return noFx(_U.update(model,{req: _p9._0}));
+         case "ResSuccess": return noFx(_U.update(model,{loading: false,res: $Maybe.Just($Result.Ok(_p9._0))}));
+         case "ResError": return noFx(_U.update(model,{loading: false,res: $Maybe.Just($Result.Err(_p9._0))}));
+         default: return {ctor: "_Tuple2",_0: _U.update(model,{loading: true,res: $Maybe.Nothing}),_1: makeRequestGiven(model)};}
    });
    var ReqBody = function (a) {    return {ctor: "ReqBody",_0: a};};
    var ReqVerb = function (a) {    return {ctor: "ReqVerb",_0: a};};
@@ -11028,7 +11029,7 @@ Elm.JsonTest.make = function (_elm) {
    var view = F2(function (address,model) {
       return A2($Html.div,
       _U.list([$Html$Attributes.$class("container")]),
-      _U.list([A2($Html.div,
+      _U.list([A2($Html.table,
               _U.list([$Html$Attributes.$class("inputs")]),
               _U.list([A3(row,
                       "Path",
@@ -11045,10 +11046,15 @@ Elm.JsonTest.make = function (_elm) {
               ,A2($Html.div,
               _U.list([$Html$Attributes.$class("submit")]),
               _U.list([A2($Html.button,_U.list([A2($Html$Events.onClick,address,Submit)]),_U.list([$Html.text("Submit")]))]))
-              ,A2($Html.div,_U.list([$Html$Attributes.$class("response")]),_U.list([viewResponse(model.res)]))]));
+              ,A2($Html.div,
+              _U.list([$Html$Attributes.$class("progress"),$Html$Attributes.hidden($Basics.not(model.loading))]),
+              _U.list([$Html.text("Fetching Response...")]))
+              ,A2($Html.div,
+              _U.list([$Html$Attributes.$class("response"),$Html$Attributes.hidden($Basics.not(isJust(model.res)))]),
+              _U.list([viewResponse(model.res)]))]));
    });
-   var Model = F4(function (a,b,c,d) {    return {path: a,req: b,verb: c,res: d};});
-   var init = {ctor: "_Tuple2",_0: A4(Model,"","","GET",$Maybe.Nothing),_1: $Effects.none};
+   var Model = F5(function (a,b,c,d,e) {    return {path: a,req: b,verb: c,res: d,loading: e};});
+   var init = {ctor: "_Tuple2",_0: A5(Model,"","","GET",$Maybe.Nothing,false),_1: $Effects.none};
    return _elm.JsonTest.values = {_op: _op,init: init,update: update,view: view};
 };Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
