@@ -1,14 +1,14 @@
-module JsonTest (init, update, view) where
+module JsonTest exposing --where
+  (init, update, view)
 
-import Effects exposing (Effects, Never)
 import Task exposing (onError, succeed, andThen)
-import Signal exposing (Address)
 import Http
-import Effects
 import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Json
+import Debug
 
 --
 -- Model: We care about the path, request method, JSON to send,
@@ -25,8 +25,8 @@ type alias Model =
     , loading : Bool
     }
 
-init : (Model, Effects Action)
-init = (Model "" "" "GET" Nothing False, Effects.none)
+init : (Model, Cmd Action)
+init = (Model "" "" "GET" Nothing False, Cmd.none)
 
 --
 -- Update: react to events to update our model
@@ -40,11 +40,11 @@ type Action
     | ResError Http.RawError
     | Submit
 
-update : Action -> Model -> (Model, Effects Action)
+update : Action -> Model -> (Model, Cmd Action)
 update action model =
   let
-    noFx m = (m, Effects.none)
-  in case action of
+    noFx m = (m, Cmd.none)
+  in case Debug.log "change" action of
     Path str ->
         noFx { model | path = str }
     ReqVerb m ->
@@ -58,7 +58,7 @@ update action model =
     Submit ->
         ({model | loading = True, res = Nothing }, makeRequestGiven model)
 
-makeRequestGiven : Model -> Effects Action
+makeRequestGiven : Model -> Cmd Action
 makeRequestGiven model =
   let
     headers =
@@ -70,38 +70,34 @@ makeRequestGiven model =
         , url = model.path
         , body = Http.string model.req
         }
-    action =
-        Http.send Http.defaultSettings request
-            `andThen` (succeed << ResSuccess)
-            `onError` (succeed << ResError)
   in
-    Effects.task action
+    Task.perform ResError ResSuccess <| Http.send Http.defaultSettings request
 
 --
 -- View: Display our app related lark:
 --
 
-view : Address Action -> Model -> Html
-view address model =
+view : Model -> Html Action
+view model =
     div [ class "container" ]
         [ h1 [] [ text "JSON Tester" ]
         , table
             [ class "inputs" ]
             [ row "Path" "input-path" <|
                 input
-                    [ id "input-path", onInput address Path, value model.path ]
+                    [ id "input-path", onInput Path, value model.path ]
                     []
             , row "Method" "input-method" <|
                 select
-                    [ id "input-method", onInput address ReqVerb ]
-                    [ option [ selected <| model.verb == "GET" ] [ text "GET" ]
-                    , option [ selected <| model.verb == "POST" ] [ text "POST" ]
+                    [ id "input-method", onChange ReqVerb ]
+                    [ option [ selected <| model.verb == "GET", value "GET" ] [ text "GET" ]
+                    , option [ selected <| model.verb == "POST", value "POST" ] [ text "POST" ]
                     ]
             , row "JSON" "input-json" <|
-                textarea [ onInput address ReqBody, value model.req ] []
+                textarea [ onInput ReqBody, value model.req ] []
             , tr [ class "submit" ]
                 [ td [] []
-                , td [] [ button [ onClick address Submit ] [ text "Submit" ] ]
+                , td [] [ button [ onClick Submit ] [ text "Submit" ] ]
                 ]
             ]
         , div
@@ -120,7 +116,7 @@ isJust m = case m of
     Nothing -> False
     _ -> True
 
-row : String -> String -> Html -> Html
+row : String -> String -> Html a -> Html a
 row name id input =
     tr [ class "row" ]
         [ td
@@ -131,7 +127,7 @@ row name id input =
             [ input ]
         ]
 
-viewResponse : Response -> Html
+viewResponse : Response -> Html a
 viewResponse res =
   let
     noResponse =
@@ -154,21 +150,12 @@ viewResponse res =
     Just res' ->
         case res' of
             Ok good -> response good
-            Err _   -> responseError
-
-onInput : Signal.Address a -> (String -> a) -> Attribute
-onInput address contentToValue =
-    on "input" targetValue (contentToValue >> Signal.message address)
+            Err Http.RawTimeout   -> text "There was a network timeout."
+            Err Http.RawNetworkError -> text "There was a network error of some sort (bad URL?)"
 
 
-
-
-
-
-
-
-
-
+onChange : (String -> action) -> Attribute action
+onChange tagger = on "change" (Json.map tagger <| Json.at ["target", "value"] Json.string)
 
 
 
